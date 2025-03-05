@@ -1,301 +1,189 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Cocktail as CocktailIcon, Filter, X } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SearchIcon, X, Wine, Filter } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import SearchBar from '@/components/ui/SearchBar';
-import CocktailCard from '@/components/ui/CocktailCard';
 import { Button } from '@/components/ui/button';
-import { 
-  searchCocktailsByName, 
-  Cocktail,
-  getCategories,
-  filterByCategory,
-  filterByAlcoholic 
-} from '@/utils/api';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-  SheetClose,
-} from "@/components/ui/sheet";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CocktailCard from '@/components/ui/CocktailCard';
+import { searchCocktailsByName, searchCocktailsByIngredient, Cocktail } from '@/utils/api';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  
-  const [cocktails, setCocktails] = useState<Cocktail[]>([]);
+  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [searchType, setSearchType] = useState(searchParams.get('type') || 'name');
+  const [results, setResults] = useState<Cocktail[]>([]);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedAlcoholic, setSelectedAlcoholic] = useState<'Alcoholic' | 'Non_Alcoholic' | ''>('');
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getCategories();
-      setCategories(data);
-    };
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    if (initialQuery) {
-      performSearch(initialQuery);
+    const q = searchParams.get('q');
+    const type = searchParams.get('type');
+    
+    if (q) {
+      setQuery(q);
+      if (type) setSearchType(type);
+      performSearch(q, type || 'name');
     }
-  }, [initialQuery]);
+  }, [searchParams]);
 
-  const performSearch = async (query: string) => {
+  const performSearch = async (searchQuery: string, type: string) => {
+    if (!searchQuery.trim()) return;
+    
     setLoading(true);
+    setError(null);
+    
     try {
-      setCocktails([]);
-      const data = await searchCocktailsByName(query);
-      setCocktails(data);
+      let searchResults: Cocktail[] = [];
       
-      // Update URL params
-      setSearchParams(prev => {
-        if (query) {
-          prev.set('q', query);
-        } else {
-          prev.delete('q');
-        }
-        return prev;
-      });
-    } catch (error) {
-      console.error('Error searching cocktails:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterBySelectedCategory = async () => {
-    if (!selectedCategory) return;
-    
-    setLoading(true);
-    try {
-      setCocktails([]);
-      const data = await filterByCategory(selectedCategory);
-      setCocktails(data);
-    } catch (error) {
-      console.error('Error filtering by category:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterBySelectedAlcoholic = async () => {
-    if (!selectedAlcoholic) return;
-    
-    setLoading(true);
-    try {
-      setCocktails([]);
-      const data = await filterByAlcoholic(selectedAlcoholic as 'Alcoholic' | 'Non_Alcoholic');
-      setCocktails(data);
-    } catch (error) {
-      console.error('Error filtering by alcoholic:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applyFilters = () => {
-    if (selectedCategory) {
-      filterBySelectedCategory();
-    } else if (selectedAlcoholic) {
-      filterBySelectedAlcoholic();
-    } else {
-      if (initialQuery) {
-        performSearch(initialQuery);
-      } else {
-        setCocktails([]);
+      if (type === 'name') {
+        searchResults = await searchCocktailsByName(searchQuery);
+      } else if (type === 'ingredient') {
+        searchResults = await searchCocktailsByIngredient(searchQuery);
       }
+      
+      setResults(searchResults);
+    } catch (err) {
+      setError('An error occurred while searching. Please try again.');
+      console.error('Search error:', err);
+    } finally {
+      setLoading(false);
     }
-    
-    setFiltersOpen(false);
   };
 
-  const clearFilters = () => {
-    setSelectedCategory('');
-    setSelectedAlcoholic('');
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
     
-    if (initialQuery) {
-      performSearch(initialQuery);
-    } else {
-      setCocktails([]);
+    setSearchParams({ q: query, type: searchType });
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    setResults([]);
+    setSearchParams({});
+  };
+
+  const handleTabChange = (value: string) => {
+    setSearchType(value);
+    if (query) {
+      setSearchParams({ q: query, type: value });
     }
-    
-    setFiltersOpen(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Search Header */}
-      <section className="pt-32 pb-16 px-6 bg-gradient-to-r from-primary/5 to-accent/5">
-        <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Cocktail</h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Search through thousands of cocktail recipes to find the perfect addition to your menu.
-            </p>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <SearchBar 
-              onSearch={performSearch} 
-              placeholder="Search by cocktail name..."
-              initialValue={initialQuery}
-              className="mb-4 animate-scale-in"
-            />
+      <main className="flex-1 pt-24 pb-16">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold mb-8">Search Cocktails</h1>
             
-            <div className="flex justify-center mt-4">
-              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Filter className="h-4 w-4" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:max-w-md">
-                  <SheetHeader>
-                    <SheetTitle>Filter Cocktails</SheetTitle>
-                    <SheetDescription>
-                      Narrow down cocktails by applying filters
-                    </SheetDescription>
-                  </SheetHeader>
-                  
-                  <div className="py-6 space-y-6">
-                    <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="categories">
-                        <AccordionTrigger className="text-lg">
-                          Categories
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <RadioGroup 
-                            value={selectedCategory} 
-                            onValueChange={setSelectedCategory}
-                            className="space-y-2 mt-2"
-                          >
-                            {categories.map((category) => (
-                              <div key={category} className="flex items-center space-x-2">
-                                <RadioGroupItem value={category} id={`category-${category}`} />
-                                <Label htmlFor={`category-${category}`}>{category}</Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </AccordionContent>
-                      </AccordionItem>
-                      
-                      <AccordionItem value="type">
-                        <AccordionTrigger className="text-lg">
-                          Type
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <RadioGroup 
-                            value={selectedAlcoholic} 
-                            onValueChange={(value) => setSelectedAlcoholic(value as 'Alcoholic' | 'Non_Alcoholic' | '')}
-                            className="space-y-2 mt-2"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="Alcoholic" id="alcoholic" />
-                              <Label htmlFor="alcoholic">Alcoholic</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="Non_Alcoholic" id="non-alcoholic" />
-                              <Label htmlFor="non-alcoholic">Non-Alcoholic</Label>
-                            </div>
-                          </RadioGroup>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </div>
-                  
-                  <SheetFooter className="sm:justify-between sm:flex-row mt-6 gap-2">
-                    <Button variant="outline" onClick={clearFilters} className="sm:w-auto w-full">
-                      <X className="mr-2 h-4 w-4" />
-                      Clear Filters
-                    </Button>
-                    <Button onClick={applyFilters} className="sm:w-auto w-full">
-                      Apply Filters
-                    </Button>
-                  </SheetFooter>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Results Section */}
-      <section className="py-12 px-6 flex-grow">
-        <div className="container mx-auto max-w-7xl">
-          {loading ? (
-            <div>
-              <div className="flex items-center justify-center my-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-              </div>
-              <div className="text-center text-muted-foreground">Loading cocktails...</div>
-            </div>
-          ) : cocktails.length > 0 ? (
-            <>
-              <div className="mb-8">
-                <h2 className="text-xl font-medium">
-                  Found {cocktails.length} {cocktails.length === 1 ? 'cocktail' : 'cocktails'}
-                </h2>
-              </div>
+            <Tabs defaultValue={searchType} onValueChange={handleTabChange} className="mb-8">
+              <TabsList className="grid grid-cols-2 mb-4">
+                <TabsTrigger value="name">Search by Name</TabsTrigger>
+                <TabsTrigger value="ingredient">Search by Ingredient</TabsTrigger>
+              </TabsList>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {cocktails.map((cocktail) => (
-                  <CocktailCard 
-                    key={cocktail.idDrink}
-                    cocktail={cocktail}
-                    className="animate-fade-up"
+              <TabsContent value="name" className="space-y-4">
+                <p className="text-muted-foreground">Find cocktails by their name or descriptive terms.</p>
+              </TabsContent>
+              
+              <TabsContent value="ingredient" className="space-y-4">
+                <p className="text-muted-foreground">Find cocktails that use a specific ingredient.</p>
+              </TabsContent>
+            </Tabs>
+            
+            <form onSubmit={handleSearch} className="relative mb-8">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                  <Input
+                    type="text"
+                    placeholder={`Search by ${searchType === 'name' ? 'cocktail name' : 'ingredient'}...`}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="pl-10 pr-10 py-6 text-lg"
                   />
+                  {query && (
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+                <Button type="submit" size="lg" className="px-6">
+                  Search
+                </Button>
+              </div>
+            </form>
+            
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="aspect-[4/3] bg-muted rounded-xl mb-3"></div>
+                    <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
                 ))}
               </div>
-            </>
-          ) : initialQuery || selectedCategory || selectedAlcoholic ? (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-                <CocktailIcon className="h-8 w-8 text-muted-foreground" />
+            ) : error ? (
+              <div className="text-center p-8 border border-destructive/20 bg-destructive/10 rounded-lg">
+                <p className="text-destructive">{error}</p>
               </div>
-              <h2 className="text-2xl font-medium mb-2">No cocktails found</h2>
-              <p className="text-muted-foreground mb-8">
-                Try using different search terms or filters
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear Search
-              </Button>
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-                <CocktailIcon className="h-8 w-8 text-muted-foreground" />
+            ) : results.length > 0 ? (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-medium">
+                    {results.length} {results.length === 1 ? 'Result' : 'Results'} for "{query}"
+                  </h2>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Filter className="h-4 w-4" />
+                    Filter
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {results.map((cocktail) => (
+                    <CocktailCard 
+                      key={cocktail.idDrink} 
+                      cocktail={cocktail}
+                      className="h-full"
+                    />
+                  ))}
+                </div>
               </div>
-              <h2 className="text-2xl font-medium mb-2">Start your search</h2>
-              <p className="text-muted-foreground">
-                Use the search bar above to find cocktails
-              </p>
-            </div>
-          )}
+            ) : query && !loading ? (
+              <div className="text-center p-12 border border-muted rounded-lg">
+                <Wine className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-medium mb-2">No cocktails found</h3>
+                <p className="text-muted-foreground mb-6">
+                  We couldn't find any cocktails for "{query}". Try a different search term or ingredient.
+                </p>
+                <Button onClick={handleClear} variant="outline">
+                  Clear Search
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center p-12 border border-muted rounded-lg">
+                <SearchIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-medium mb-2">Search for cocktails</h3>
+                <p className="text-muted-foreground mb-6">
+                  Enter a cocktail name or ingredient to find recipes
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </section>
+      </main>
       
       <Footer />
     </div>
