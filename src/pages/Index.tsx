@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Search, Wine, Trophy, Star } from 'lucide-react';
+import { ChevronRight, Search, Cocktail, Trophy, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -43,7 +44,7 @@ const Index = () => {
       description: 'Explore thousands of cocktail recipes with detailed ingredients and instructions.',
     },
     {
-      icon: <Wine className="h-8 w-8 text-cocktail-teal" />,
+      icon: <Cocktail className="h-8 w-8 text-cocktail-teal" />,
       title: 'Curate',
       description: 'Save your favorite drinks to your restaurant dashboard for easy access.',
     },
