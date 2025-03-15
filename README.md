@@ -1,69 +1,38 @@
-# Welcome to your Lovable project
+# Restaurant Cocktail Companion
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/8c8fb698-e5b4-4210-a271-730c6a33f954
+**URL**: https://elixir-cocktails.netlify.app/
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+This application is designed to help restaurant owners and managers discover, curate, and analyze cocktails for their menus. Here's what the app offers:
 
-**Use Lovable**
+### Discovery
+- **Search Functionality**: Search cocktails by name with instant results
+- **Filter System**: Filter cocktails by category (e.g., Ordinary Drink, Cocktail) and type (Alcoholic/Non-Alcoholic)
+- **Featured Cocktails**: View a rotating selection of featured cocktails on the homepage
+- **Random Cocktails**: Discover new cocktails with a random selection feature
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8c8fb698-e5b4-4210-a271-730c6a33f954) and start prompting.
+### Curation
+- **Cocktail Collection**: Save your favorite cocktails to your dashboard
+- **Detailed Information**: View comprehensive details about each cocktail including ingredients, measurements, and preparation instructions
+- **Cocktail Gallery**: Browse your saved cocktails in an elegant visual format
 
-Changes made via Lovable will be committed automatically to this repo.
+### Analysis
+- **Flavor Profile Ratings**: Rate cocktails based on sweetness, sourness, bitterness, and strength
+- **Customer Feedback**: Gather customer ratings and feedback on different cocktails
+- **Leaderboard**: Track the most popular cocktails based on customer ratings
+- **Performance Metrics**: Monitor which cocktails are trending with your customers
 
-**Use your preferred IDE**
+### Customer Experience
+- **Customer Rating Page**: A dedicated interface for customers to rate cocktails they've tried
+- **Intuitive UI**: Simple, mobile-friendly design for easy customer interaction
+- **Visual Presentation**: Beautiful presentation of cocktail images and information
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This project is built with:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8c8fb698-e5b4-4210-a271-730c6a33f954) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- TheCocktailDB API - External API for cocktail data
