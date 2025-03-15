@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Heart, Share2 } from 'lucide-react';
@@ -53,7 +52,16 @@ const CocktailDetails = () => {
   const handleRatingChange = (category: string, value: number) => {
     if (!cocktail) return;
     
-    rateCocktail(cocktail.idDrink, category as any, value);
+    // Create a partial ratings object with just the category that changed
+    const ratingUpdate = { [category]: value } as Partial<{
+      sweet: number;
+      sour: number;
+      bitter: number;
+      strong: number;
+      overall: number;
+    }>;
+    
+    rateCocktail(cocktail.idDrink, ratingUpdate);
     toast.success('Rating saved');
   };
 
@@ -116,12 +124,14 @@ const CocktailDetails = () => {
           </Button>
         </div>
         
+        
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
             <div className="relative rounded-xl overflow-hidden">
               <img 
-                src={cocktail.strDrinkThumb} 
-                alt={cocktail.strDrink}
+                src={cocktail?.strDrinkThumb} 
+                alt={cocktail?.strDrink}
                 className="w-full aspect-square object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
@@ -150,12 +160,12 @@ const CocktailDetails = () => {
           </div>
           
           <div>
-            <h1 className="text-3xl font-bold mb-2">{cocktail.strDrink}</h1>
+            <h1 className="text-3xl font-bold mb-2">{cocktail?.strDrink}</h1>
             
             <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="outline">{cocktail.strCategory}</Badge>
-              <Badge variant="outline">{cocktail.strAlcoholic}</Badge>
-              <Badge variant="outline">{cocktail.strGlass}</Badge>
+              <Badge variant="outline">{cocktail?.strCategory}</Badge>
+              <Badge variant="outline">{cocktail?.strAlcoholic}</Badge>
+              <Badge variant="outline">{cocktail?.strGlass}</Badge>
             </div>
             
             <Separator className="my-6" />
@@ -179,7 +189,7 @@ const CocktailDetails = () => {
             
             <div className="mb-6">
               <h2 className="text-lg font-medium mb-3">Instructions</h2>
-              <p className="text-muted-foreground">{cocktail.strInstructions}</p>
+              <p className="text-muted-foreground">{cocktail?.strInstructions}</p>
             </div>
             
             <Separator className="my-6" />

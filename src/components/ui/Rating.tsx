@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -7,22 +6,37 @@ import { Button } from '@/components/ui/button';
 import { useCocktails } from '@/context/CocktailContext';
 
 interface RatingProps {
-  cocktailId: string;
+  cocktailId?: string;  // Made optional since not all usages provide it
   className?: string;
+  value?: number;       // Added to support controlled component usage
+  readOnly?: boolean;   // Added to support readonly display
+  onChange?: (value: number) => void; // Added to support external value changes
 }
 
-const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
+const Rating: React.FC<RatingProps> = ({ 
+  cocktailId, 
+  className, 
+  value: externalValue, 
+  readOnly = false,
+  onChange 
+}) => {
   const { rateCocktail } = useCocktails();
-  const [ratings, setRatings] = useState({
+  const [internalRatings, setInternalRatings] = useState({
     sweet: 3,
     sour: 3,
     bitter: 3,
     strong: 3,
     overall: 3,
   });
+  
+  // For simple star rating when used as a display/input component
+  const [internalValue, setInternalValue] = useState(externalValue || 3);
+  
+  // Determine which value to show in stars
+  const displayValue = externalValue !== undefined ? externalValue : internalValue;
 
-  const handleSliderChange = (name: keyof typeof ratings, value: number[]) => {
-    setRatings(prev => ({
+  const handleSliderChange = (name: keyof typeof internalRatings, value: number[]) => {
+    setInternalRatings(prev => ({
       ...prev,
       [name]: value[0],
     }));
@@ -30,12 +44,23 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    rateCocktail(cocktailId, ratings);
+    if (cocktailId) {
+      rateCocktail(cocktailId, internalRatings);
+    }
+  };
+
+  const handleStarClick = (starValue: number) => {
+    if (readOnly) return;
+    
+    setInternalValue(starValue);
+    if (onChange) {
+      onChange(starValue);
+    }
   };
 
   const renderStars = (value: number) => {
     return (
-      <div className="flex">
+      <div className={cn("flex", { "cursor-pointer": !readOnly }, className)}>
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
@@ -43,14 +68,22 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
               "w-4 h-4 transition-all",
               star <= value
                 ? "text-primary fill-primary"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
+              !readOnly && "hover:scale-110"
             )}
+            onClick={readOnly ? undefined : () => handleStarClick(star)}
           />
         ))}
       </div>
     );
   };
 
+  // If used as a simple star rating component
+  if (onChange || externalValue !== undefined || readOnly) {
+    return renderStars(displayValue);
+  }
+
+  // Otherwise, render the full cocktail rating form
   return (
     <div className={cn("glass-effect p-6 rounded-xl", className)}>
       <h3 className="text-lg font-medium mb-4">Rate this cocktail</h3>
@@ -61,10 +94,10 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">Sweetness</label>
-              {renderStars(ratings.sweet)}
+              {renderStars(internalRatings.sweet)}
             </div>
             <Slider
-              value={[ratings.sweet]}
+              value={[internalRatings.sweet]}
               min={1}
               max={5}
               step={1}
@@ -77,10 +110,10 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">Sourness</label>
-              {renderStars(ratings.sour)}
+              {renderStars(internalRatings.sour)}
             </div>
             <Slider
-              value={[ratings.sour]}
+              value={[internalRatings.sour]}
               min={1}
               max={5}
               step={1}
@@ -93,10 +126,10 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">Bitterness</label>
-              {renderStars(ratings.bitter)}
+              {renderStars(internalRatings.bitter)}
             </div>
             <Slider
-              value={[ratings.bitter]}
+              value={[internalRatings.bitter]}
               min={1}
               max={5}
               step={1}
@@ -109,10 +142,10 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">Strength</label>
-              {renderStars(ratings.strong)}
+              {renderStars(internalRatings.strong)}
             </div>
             <Slider
-              value={[ratings.strong]}
+              value={[internalRatings.strong]}
               min={1}
               max={5}
               step={1}
@@ -125,10 +158,10 @@ const Rating: React.FC<RatingProps> = ({ cocktailId, className }) => {
           <div className="space-y-2 pt-4 border-t">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">Overall Rating</label>
-              {renderStars(ratings.overall)}
+              {renderStars(internalRatings.overall)}
             </div>
             <Slider
-              value={[ratings.overall]}
+              value={[internalRatings.overall]}
               min={1}
               max={5}
               step={1}
