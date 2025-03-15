@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getRandomCocktail, getCocktailById, Cocktail } from '@/utils/api';
+import { getRandomCocktail, getCocktailById, searchCocktailsByName, Cocktail } from '@/utils/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import Rating from '@/components/ui/Rating';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Wine, Star, BookOpen, History } from 'lucide-react';
+import { Wine, Star, BookOpen, History, Search } from 'lucide-react';
 
 const Customer = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +23,9 @@ const Customer = () => {
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
   const [loading, setLoading] = useState(false);
   const [notes, setNotes] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Cocktail[]>([]);
+  const [searching, setSearching] = useState(false);
   const [ratings, setRatings] = useState({
     flavor: 0,
     presentation: 0,
@@ -81,6 +84,28 @@ const Customer = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setSearching(true);
+    try {
+      const results = await searchCocktailsByName(searchQuery);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching cocktails:', error);
+      toast.error('Could not search for cocktails');
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const selectCocktailFromSearch = (selectedCocktail: Cocktail) => {
+    setCocktail(selectedCocktail);
+    setCocktailId(selectedCocktail.idDrink);
+    setSearchResults([]);
+    setSearchQuery('');
   };
 
   const handleLogin = () => {
@@ -232,6 +257,65 @@ const Customer = () => {
           </TabsList>
           
           <TabsContent value="rate">
+            {/* Search Bar - New Addition */}
+            <div className="mb-8">
+              <div className="flex gap-2">
+                <div className="flex-grow">
+                  <Input
+                    type="text"
+                    placeholder="Search for a cocktail by name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                </div>
+                <Button 
+                  onClick={handleSearch}
+                  disabled={searching || !searchQuery.trim()}
+                  variant="outline"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+              
+              {/* Search Results - New Addition */}
+              {searching && (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-sm text-muted-foreground mt-2">Searching...</p>
+                </div>
+              )}
+              
+              {!searching && searchResults.length > 0 && (
+                <div className="mt-4 border rounded-lg p-4">
+                  <h3 className="font-medium mb-2">Search Results</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+                    {searchResults.map(result => (
+                      <div 
+                        key={result.idDrink}
+                        className="flex items-center gap-2 p-2 border rounded hover:bg-muted cursor-pointer"
+                        onClick={() => selectCocktailFromSearch(result)}
+                      >
+                        <img 
+                          src={result.strDrinkThumb} 
+                          alt={result.strDrink} 
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <span className="font-medium text-sm truncate">{result.strDrink}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!searching && searchResults.length === 0 && searchQuery && (
+                <div className="mt-4 text-center py-2">
+                  <p className="text-sm text-muted-foreground">No cocktails found. Try a different search term.</p>
+                </div>
+              )}
+            </div>
+
             {cocktail ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div>
@@ -307,7 +391,7 @@ const Customer = () => {
                 <Wine className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-xl font-medium mb-2">No cocktail selected</h2>
                 <p className="text-muted-foreground mb-6">
-                  Click the button below to get a random cocktail to rate
+                  Search for a cocktail above or click the button below to get a random cocktail to rate
                 </p>
                 <Button onClick={handleRandomCocktail} disabled={loading}>
                   {loading ? 'Loading...' : 'Get Random Cocktail'}
