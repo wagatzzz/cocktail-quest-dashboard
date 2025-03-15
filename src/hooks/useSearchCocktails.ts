@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   searchCocktailsByName, 
@@ -7,6 +7,7 @@ import {
   filterByCategory,
   filterByAlcoholic 
 } from '@/utils/api';
+import { useToast } from '@/hooks/use-toast';
 
 export const useSearchCocktails = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,11 +19,16 @@ export const useSearchCocktails = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedAlcoholic, setSelectedAlcoholic] = useState<'Alcoholic' | 'Non_Alcoholic' | ''>('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { toast } = useToast();
 
-  const performSearch = async (query: string) => {
+  const performSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setCocktails([]);
+      return;
+    }
+    
     setLoading(true);
     try {
-      setCocktails([]);
       const data = await searchCocktailsByName(query);
       setCocktails(data);
       
@@ -37,21 +43,30 @@ export const useSearchCocktails = () => {
       });
     } catch (error) {
       console.error('Error searching cocktails:', error);
+      toast({
+        title: "Search failed",
+        description: "There was a problem with your search. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [setSearchParams, toast]);
 
   const filterBySelectedCategory = async () => {
     if (!selectedCategory) return;
     
     setLoading(true);
     try {
-      setCocktails([]);
       const data = await filterByCategory(selectedCategory);
       setCocktails(data);
     } catch (error) {
       console.error('Error filtering by category:', error);
+      toast({
+        title: "Filter failed",
+        description: "There was a problem applying the category filter.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -62,11 +77,15 @@ export const useSearchCocktails = () => {
     
     setLoading(true);
     try {
-      setCocktails([]);
       const data = await filterByAlcoholic(selectedAlcoholic as 'Alcoholic' | 'Non_Alcoholic');
       setCocktails(data);
     } catch (error) {
       console.error('Error filtering by alcoholic:', error);
+      toast({
+        title: "Filter failed",
+        description: "There was a problem applying the type filter.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

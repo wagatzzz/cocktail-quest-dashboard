@@ -192,13 +192,24 @@ const mockCocktails: Cocktail[] = [
 
 // Search cocktails by name
 export const searchCocktailsByName = async (name: string): Promise<Cocktail[]> => {
+  if (!name.trim()) return [];
+  
   try {
+    console.log('Searching for cocktails with name:', name);
     const response = await fetch(`${BASE_URL}/search.php?s=${encodeURIComponent(name)}`);
     const data: CocktailSearchResponse = await response.json();
-    return data.drinks || [];
+    console.log('Search response:', data);
+    
+    if (!data.drinks) {
+      console.log('No cocktails found, returning empty array');
+      return [];
+    }
+    
+    return data.drinks;
   } catch (error) {
     console.error('Error searching cocktails:', error);
     // Return mock data when API is unavailable
+    console.log('Returning mock data due to API error');
     return mockCocktails.filter(c => 
       c.strDrink.toLowerCase().includes(name.toLowerCase())
     );
