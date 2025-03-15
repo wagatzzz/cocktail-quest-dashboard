@@ -69,15 +69,150 @@ export const getIngredientsAndMeasures = (cocktail: Cocktail): {ingredient: stri
   return ingredients;
 };
 
+// Mock data for when the API is unavailable
+const mockCocktails: Cocktail[] = [
+  {
+    idDrink: "11007",
+    strDrink: "Margarita",
+    strCategory: "Ordinary Drink",
+    strAlcoholic: "Alcoholic",
+    strGlass: "Cocktail glass",
+    strInstructions: "Rub the rim of the glass with the lime slice to make the salt stick to it. Take care to moisten only the outer rim and sprinkle the salt on it. The salt should present to the lips of the imbiber and never mix into the cocktail. Shake the other ingredients with ice, then carefully pour into the glass.",
+    strDrinkThumb: "https://www.thecocktaildb.com/images/media/drink/5noda61589575158.jpg",
+    strIngredient1: "Tequila",
+    strIngredient2: "Triple sec",
+    strIngredient3: "Lime juice",
+    strIngredient4: "Salt",
+    strIngredient5: null,
+    strIngredient6: null,
+    strIngredient7: null,
+    strIngredient8: null,
+    strIngredient9: null,
+    strIngredient10: null,
+    strIngredient11: null,
+    strIngredient12: null,
+    strIngredient13: null,
+    strIngredient14: null,
+    strIngredient15: null,
+    strMeasure1: "1 1/2 oz ",
+    strMeasure2: "1/2 oz ",
+    strMeasure3: "1 oz ",
+    strMeasure4: null,
+    strMeasure5: null,
+    strMeasure6: null,
+    strMeasure7: null,
+    strMeasure8: null,
+    strMeasure9: null,
+    strMeasure10: null,
+    strMeasure11: null,
+    strMeasure12: null,
+    strMeasure13: null,
+    strMeasure14: null,
+    strMeasure15: null
+  },
+  {
+    idDrink: "11001",
+    strDrink: "Old Fashioned",
+    strCategory: "Cocktail",
+    strAlcoholic: "Alcoholic",
+    strGlass: "Old-fashioned glass",
+    strInstructions: "Place sugar cube in old fashioned glass and saturate with bitters, add a dash of plain water. Muddle until dissolved. Fill the glass with ice cubes and add whiskey. Garnish with orange twist, and a cocktail cherry.",
+    strDrinkThumb: "https://www.thecocktaildb.com/images/media/drink/vrwquq1478252802.jpg",
+    strIngredient1: "Bourbon",
+    strIngredient2: "Angostura bitters",
+    strIngredient3: "Sugar",
+    strIngredient4: "Water",
+    strIngredient5: null,
+    strIngredient6: null,
+    strIngredient7: null,
+    strIngredient8: null,
+    strIngredient9: null,
+    strIngredient10: null,
+    strIngredient11: null,
+    strIngredient12: null,
+    strIngredient13: null,
+    strIngredient14: null,
+    strIngredient15: null,
+    strMeasure1: "4.5 cL",
+    strMeasure2: "2 dashes",
+    strMeasure3: "1 cube",
+    strMeasure4: "dash",
+    strMeasure5: null,
+    strMeasure6: null,
+    strMeasure7: null,
+    strMeasure8: null,
+    strMeasure9: null,
+    strMeasure10: null,
+    strMeasure11: null,
+    strMeasure12: null,
+    strMeasure13: null,
+    strMeasure14: null,
+    strMeasure15: null
+  },
+  {
+    idDrink: "11003",
+    strDrink: "Negroni",
+    strCategory: "Cocktail",
+    strAlcoholic: "Alcoholic",
+    strGlass: "Old-fashioned glass",
+    strInstructions: "Stir into glass over ice, garnish and serve.",
+    strDrinkThumb: "https://www.thecocktaildb.com/images/media/drink/qgdu971561574065.jpg",
+    strIngredient1: "Gin",
+    strIngredient2: "Campari",
+    strIngredient3: "Sweet Vermouth",
+    strIngredient4: null,
+    strIngredient5: null,
+    strIngredient6: null,
+    strIngredient7: null,
+    strIngredient8: null,
+    strIngredient9: null,
+    strIngredient10: null,
+    strIngredient11: null,
+    strIngredient12: null,
+    strIngredient13: null,
+    strIngredient14: null,
+    strIngredient15: null,
+    strMeasure1: "1 oz ",
+    strMeasure2: "1 oz ",
+    strMeasure3: "1 oz ",
+    strMeasure4: null,
+    strMeasure5: null,
+    strMeasure6: null,
+    strMeasure7: null,
+    strMeasure8: null,
+    strMeasure9: null,
+    strMeasure10: null,
+    strMeasure11: null,
+    strMeasure12: null,
+    strMeasure13: null,
+    strMeasure14: null,
+    strMeasure15: null
+  }
+];
+
 // Search cocktails by name
 export const searchCocktailsByName = async (name: string): Promise<Cocktail[]> => {
+  if (!name.trim()) return [];
+  
   try {
+    console.log('Searching for cocktails with name:', name);
     const response = await fetch(`${BASE_URL}/search.php?s=${encodeURIComponent(name)}`);
     const data: CocktailSearchResponse = await response.json();
-    return data.drinks || [];
+    console.log('Search response:', data);
+    
+    if (!data.drinks) {
+      console.log('No cocktails found, returning empty array');
+      return [];
+    }
+    
+    return data.drinks;
   } catch (error) {
     console.error('Error searching cocktails:', error);
-    return [];
+    // Return mock data when API is unavailable
+    console.log('Returning mock data due to API error');
+    return mockCocktails.filter(c => 
+      c.strDrink.toLowerCase().includes(name.toLowerCase())
+    );
   }
 };
 
@@ -89,7 +224,9 @@ export const getRandomCocktail = async (): Promise<Cocktail | null> => {
     return data.drinks && data.drinks.length > 0 ? data.drinks[0] : null;
   } catch (error) {
     console.error('Error getting random cocktail:', error);
-    return null;
+    // Return a random cocktail from mock data when API is unavailable
+    const randomIndex = Math.floor(Math.random() * mockCocktails.length);
+    return mockCocktails[randomIndex];
   }
 };
 
@@ -101,7 +238,8 @@ export const getCocktailById = async (id: string): Promise<Cocktail | null> => {
     return data.drinks && data.drinks.length > 0 ? data.drinks[0] : null;
   } catch (error) {
     console.error('Error getting cocktail details:', error);
-    return null;
+    // Return mock data when API is unavailable
+    return mockCocktails.find(c => c.idDrink === id) || null;
   }
 };
 
@@ -113,7 +251,10 @@ export const getCocktailsByFirstLetter = async (letter: string): Promise<Cocktai
     return data.drinks || [];
   } catch (error) {
     console.error('Error getting cocktails by letter:', error);
-    return [];
+    // Return mock data when API is unavailable
+    return mockCocktails.filter(c => 
+      c.strDrink.charAt(0).toLowerCase() === letter.toLowerCase()
+    );
   }
 };
 
@@ -125,7 +266,8 @@ export const getCategories = async (): Promise<string[]> => {
     return data.drinks ? data.drinks.map((item: {strCategory: string}) => item.strCategory) : [];
   } catch (error) {
     console.error('Error getting categories:', error);
-    return [];
+    // Return mock categories when API is unavailable
+    return ["Ordinary Drink", "Cocktail", "Shake", "Other/Unknown", "Cocoa", "Shot", "Coffee / Tea", "Homemade Liqueur", "Punch / Party Drink", "Beer", "Soft Drink"];
   }
 };
 
@@ -137,7 +279,8 @@ export const filterByCategory = async (category: string): Promise<Cocktail[]> =>
     return data.drinks || [];
   } catch (error) {
     console.error('Error filtering by category:', error);
-    return [];
+    // Return mock data when API is unavailable
+    return mockCocktails.filter(c => c.strCategory === category);
   }
 };
 
@@ -149,6 +292,7 @@ export const filterByAlcoholic = async (alcoholic: 'Alcoholic' | 'Non_Alcoholic'
     return data.drinks || [];
   } catch (error) {
     console.error('Error filtering by alcoholic:', error);
-    return [];
+    // Return mock data when API is unavailable
+    return mockCocktails.filter(c => c.strAlcoholic === alcoholic);
   }
 };

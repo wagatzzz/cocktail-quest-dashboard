@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Cocktail } from '@/utils/api';
 import CocktailCardImage from './cocktail-card/CocktailCardImage';
 import CocktailCardContent from './cocktail-card/CocktailCardContent';
+import { Link } from 'react-router-dom';
 
 interface CocktailCardProps {
   cocktail: Cocktail;
@@ -25,7 +26,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
   };
 
   return (
-    <div className={cn(variants[variant], className, 'group')}>
+    <Link to={`/cocktail/${cocktail.idDrink}`} className={cn(variants[variant], className, 'group block')}>
       <CocktailCardImage 
         cocktail={cocktail} 
         showActions={showActions} 
@@ -34,7 +35,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
         cocktail={cocktail} 
         variant={variant} 
       />
-    </div>
+    </Link>
   );
 };
 

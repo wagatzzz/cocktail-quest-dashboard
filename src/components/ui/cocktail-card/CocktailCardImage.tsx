@@ -34,24 +34,26 @@ const CocktailCardImage: React.FC<CocktailCardImageProps> = ({
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      <img 
-        src={cocktail.strDrinkThumb} 
-        alt={cocktail.strDrink}
-        className="cocktail-card-image"
-      />
+      <Link to={`/cocktail/${cocktail.idDrink}`}>
+        <img 
+          src={cocktail.strDrinkThumb} 
+          alt={cocktail.strDrink}
+          className="cocktail-card-image"
+        />
+      </Link>
       
-      {showActions && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <div className="flex items-center justify-between">
-              <Link 
-                to={`/cocktail/${cocktail.idDrink}`}
-                className="text-white hover:underline flex items-center gap-1 text-sm"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>View Details</span>
-              </Link>
-              
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="flex items-center justify-between">
+            <Link 
+              to={`/cocktail/${cocktail.idDrink}`}
+              className="text-white hover:underline flex items-center gap-1 text-sm"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>View Details</span>
+            </Link>
+            
+            {showActions && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -66,10 +68,10 @@ const CocktailCardImage: React.FC<CocktailCardImageProps> = ({
                   {isInFavorites ? "Remove from favorites" : "Add to favorites"}
                 </span>
               </Button>
-            </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

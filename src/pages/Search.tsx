@@ -25,14 +25,20 @@ const Search = () => {
     clearFilters
   } = useSearchCocktails();
 
+  // Fetch categories once when the component mounts
   useEffect(() => {
     const fetchCategories = async () => {
-      const data = await getCategories();
-      setCategories(data);
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
     };
     fetchCategories();
   }, [setCategories]);
 
+  // Perform initial search if there's a query in the URL
   useEffect(() => {
     if (initialQuery) {
       performSearch(initialQuery);
