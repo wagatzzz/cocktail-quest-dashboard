@@ -32,19 +32,20 @@ const Footer: React.FC = () => {
             <div>
               <h3 className="text-sm font-medium mb-4">Explore</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Popular Cocktails</a></li>
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Recent Additions</a></li>
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Top Rated</a></li>
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Seasonal Specials</a></li>
+                <li><Link to="/search" className="text-sm text-muted-foreground hover:text-primary transition-colors">Popular Cocktails</Link></li>
+                <li><Link to="/search" className="text-sm text-muted-foreground hover:text-primary transition-colors">Recent Additions</Link></li>
+                <li><Link to="/leaderboard" className="text-sm text-muted-foreground hover:text-primary transition-colors">Top Rated</Link></li>
+                <li><Link to="/search" className="text-sm text-muted-foreground hover:text-primary transition-colors">Seasonal Specials</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-sm font-medium mb-4">Legal</h3>
+              <h3 className="text-sm font-medium mb-4">For Users</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cookie Policy</a></li>
+                <li><Link to="/customer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Customer Diary</Link></li>
+                <li><Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
